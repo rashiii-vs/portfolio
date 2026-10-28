@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rashi Wanwani | Oracle Red Bull Racing - AI & ML Portfolio</title>
+  <meta name="description" content="Official 3D interactive portfolio of Rashi Wanwani. B.Tech CSE in AI & ML, collaborative engineering, F1 Oracle Red Bull Racing telemetry theme, 3D RB22 car, and interactive Ferrari Aperta steering wheel." />
+
+  <!-- Google Fonts: Orbitron, Rajdhani, Titillium Web, Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet" />
+
+  <!-- FontAwesome Icons for F1 Pit Wall Controls -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body class="f1-theme">
+  <!-- Interactive Custom Cursor -->
+  <div id="f1-cursor" class="f1-cursor"></div>
+  <div id="f1-cursor-dot" class="f1-cursor-dot"></div>
+
+  <!-- Background 3D Speed Tunnel & Particle Field Canvas -->
+  <canvas id="ambient-canvas"></canvas>
+
+  <!-- PIT WALL TOP HUD / TELEMETRY STATUS BAR -->
+  <header class="pit-hud" id="pit-hud">
+    <div class="hud-left">
+      <div class="redbull-logo-badge">
+        <span class="oracle-tag">ORACLE</span>
+        <span class="rb-title"><span class="red-text">RED BULL</span> RACING</span>
+      </div>
+      <div class="telemetry-live-badge">
+        <span class="live-dot"></span>
+        <span class="live-text">TELEMETRY LIVE</span>
+      </div>
+      <div class="sector-times">
+        <div class="sector s1 active">S1 <span class="time purple">21.849</span></div>
+        <div class="sector s2 active">S2 <span class="time purple">29.102</span></div>
+        <div class="sector s3 active">S3 <span class="time yellow">23.415</span></div>
+      </div>
+    </div>
+
+    <!-- RPM REV LIGHTS DISPLAY -->
+    <div class="rpm-lights-cluster" id="rpm-lights-cluster">
+      <div class="rpm-led green" data-led="1"></div>
+      <div class="rpm-led green" data-led="2"></div>
+      <div class="rpm-led green" data-led="3"></div>
+      <div class="rpm-led green" data-led="4"></div>
+      <div class="rpm-led red" data-led="5"></div>
+      <div class="rpm-led red" data-led="6"></div>
+      <div class="rpm-led red" data-led="7"></div>
+      <div class="rpm-led red" data-led="8"></div>
+      <div class="rpm-led blue" data-led="9"></div>
+      <div class="rpm-led blue" data-led="10"></div>
+    </div>
+
+    <div class="hud-right">
+      <div class="telemetry-stat">
+        <span class="stat-lbl">SPEED</span>
+        <span class="stat-val" id="hud-speed">315 <small>KM/H</small></span>
+      </div>
+      <div class="telemetry-stat">
+        <span class="stat-lbl">GEAR</span>
+        <span class="stat-val gear-highlight" id="hud-gear">7</span>
+      </div>
+      <div class="telemetry-stat drs-badge" id="drs-indicator">
+        <span class="stat-lbl">DRS</span>
+        <span class="stat-val drs-active">OPEN</span>
+      </div>
+      <!-- Solid Background Color Selector -->
+      <div class="solid-palette-toggle" title="Select Solid Background Color">
+        <span class="palette-lbl">SOLID BG</span>
+        <button class="color-swatch active" data-color="#060814" style="background: #060814;" title="Red Bull Navy (#060814)"></button>
+        <button class="color-swatch" data-color="#050507" style="background: #050507;" title="Obsidian Black (#050507)"></button>
+        <button class="color-swatch" data-color="#0e121e" style="background: #0e121e;" title="Asphalt Slate (#0e121e)"></button>
+        <button class="color-swatch" data-color="#0a1024" style="background: #0a1024;" title="Dark Blue (#0a1024)"></button>
+      </div>
+
+      <!-- Audio Toggle Button -->
+      <button class="hud-audio-btn" id="audio-toggle" title="Toggle F1 V6 Engine Sound">
+        <i class="fa-solid fa-volume-xmark" id="audio-icon"></i>
+        <span class="audio-lbl">AUDIO</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- PIT STOP NAVIGATION TRACKER (LAPS) -->
+  <nav class="lap-navigation" id="lap-nav">
+    <div class="lap-step active" data-page="1" id="nav-lap-1">
+      <span class="lap-number">LAP 01</span>
+      <span class="lap-name">COCKPIT INTRO</span>
+      <div class="step-indicator"></div>
+    </div>
+    <div class="lap-step" data-page="2" id="nav-lap-2">
+      <span class="lap-number">LAP 02</span>
+      <span class="lap-name">WHAT I DO & RB22</span>
+      <div class="step-indicator"></div>
+    </div>
+    <div class="lap-step" data-page="3" id="nav-lap-3">
+      <span class="lap-number">LAP 03</span>
+      <span class="lap-name">STATS & PIT WALL</span>
+      <div class="step-indicator"></div>
+    </div>
+  </nav>
+
+  <!-- MAIN SCROLL / PRESENTATION WRAPPER -->
+  <main class="pages-viewport" id="pages-viewport">
+
+    <!-- ================= PAGE 1: HERO & FERRARI APERTA MELIH CAVDAR WHEEL ================= -->
+    <section class="page-section page-1 active" id="page-1" data-index="1">
+      <div class="page-content center-content">
+        <!-- Hero Telemetry Overhead Tag -->
+        <div class="hero-roster-tag">
+          <i class="fa-solid fa-flag-checkered"></i>
+          <span>FORMULA 1 ORACLE RED BULL RACING • DRIVER ROSTER #01</span>
+        </div>
+
+        <!-- Central Bold Hero Statement Required by User -->
+        <div class="hero-statement-wrapper">
+          <h1 class="hero-title">
+            <span class="hero-subline">Hello, I am</span>
+            <span class="hero-name glow-text">RASHI WANWANI</span>
+          </h1>
+          <p class="hero-descriptor">
+            B.Tech CSE in Artificial Intelligence & Machine Learning <span class="separator">•</span> High-Performance Collaborative Systems Engineer
+          </p>
+          <div class="hero-tags">
+            <span class="spec-tag"><i class="fa-solid fa-brain"></i> AI & DEEP LEARNING</span>
+            <span class="spec-tag"><i class="fa-solid fa-users-gear"></i> COLLABORATIVE BUILDS</span>
+            <span class="spec-tag"><i class="fa-solid fa-bolt"></i> HIGH-THROUGHPUT CODE</span>
+          </div>
+        </div>
+
+        <!-- Bottom Wheel Area: Ferrari Aperta - Melih Çavdar Steering Wheel -->
+        <div class="wheel-interactive-cluster" id="wheel-cluster">
+          <!-- Text Indication Required by User -->
+          <div class="wheel-instruction-card">
+            <div class="instruction-icon-rot">
+              <i class="fa-solid fa-arrow-rotate-left rotate-pulse"></i>
+            </div>
+            <div class="instruction-text-block">
+              <span class="inst-highlight">ROTATE ANTI-CLOCKWISE THROUGH CURSOR</span>
+              <span class="inst-sub">Rotate the Ferrari Aperta – Melih Çavdar wheel or scroll down to ignite engine & launch to Lap 2</span>
+            </div>
+          </div>
+
+          <!-- The Ferrari Aperta - Melih Cavdar Steering Wheel Element -->
+          <div class="wheel-housing" id="wheel-housing">
+            <!-- Dynamic LED shift lights arc on top of wheel -->
+            <div class="wheel-led-arch" id="wheel-led-arch">
+              <span class="w-led" data-idx="0"></span>
+              <span class="w-led" data-idx="1"></span>
+              <span class="w-led" data-idx="2"></span>
+              <span class="w-led" data-idx="3"></span>
+              <span class="w-led" data-idx="4"></span>
+              <span class="w-led" data-idx="5"></span>
+              <span class="w-led" data-idx="6"></span>
+              <span class="w-led" data-idx="7"></span>
+              <span class="w-led" data-idx="8"></span>
+              <span class="w-led" data-idx="9"></span>
+            </div>
+
+            <!-- Rotating Wheel Body -->
+            <div class="wheel-rotator" id="wheel-rotator">
+              <img src="assets/ferrari_aperta_wheel.jpg" alt="Ferrari Aperta Melih Cavdar Steering Wheel" class="wheel-img" id="wheel-img" draggable="false" />
+              <!-- Center Prancing Horse & Melih Cavdar Badge Glow Overlay -->
+              <div class="wheel-center-glow"></div>
+            </div>
+
+            <!-- Rotation Meter & Drag Indicator Overlay -->
+            <div class="wheel-telemetry-readout">
+              <span class="rot-label">DIAL ANGLE</span>
+              <span class="rot-value" id="wheel-deg-display">0.0°</span>
+              <span class="rot-threshold" id="wheel-status-text">HOLD & ROTATE ↺</span>
+            </div>
+
+            <!-- Accessible Quick Launch Button -->
+            <button class="wheel-quick-shift-btn" id="wheel-quick-shift" title="Click to rotate anti-clockwise & launch">
+              <i class="fa-solid fa-rotate-left"></i> QUICK ENGAGE
+            </button>
+          </div>
+
+          <!-- Bottom hint -->
+          <div class="scroll-down-hint">
+            <span class="mouse-icon"><span class="wheel-dot"></span></span>
+            <span>SCROLL DOWN OR DRAG WHEEL</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 2: WHAT I DO, CONNECT TAB & 3D RB22 CAR ================= -->
+    <section class="page-section page-2" id="page-2" data-index="2">
+      <div class="page-content flex-layout">
+        
+        <!-- Top Section Header -->
+        <div class="section-header-block">
+          <div class="sector-label"><i class="fa-solid fa-gauge-high"></i> SECTOR 02 // POWERTRAIN & CORE SPECIFICATIONS</div>
+          <h2 class="section-title">WHAT I DO</h2>
+          <div class="redbull-accent-bar"></div>
+        </div>
+
+        <!-- Explanation Card (AI/ML & Collaborative Projects) -->
+        <div class="about-telemetry-container">
+          <div class="explanation-box glassmorphism">
+            <div class="box-top-telemetry">
+              <span class="chassis-badge">CHASSIS SPEC: RASHI-WANWANI-22</span>
+              <span class="status-badge"><i class="fa-solid fa-circle-check"></i> ACTIVE DEV READY</span>
+            </div>
+            <p class="explanation-statement">
+              I am a student currently pursuing <strong>B.Tech CSE in Artificial Intelligence and Machine Learning (AI & ML)</strong>. 
+              I design intelligent data-driven architectures, train high-accuracy neural models, and build 
+              <strong>scalable collaborative engineering projects</strong> with the precision, speed, and agility of an F1 pit crew.
+            </p>
+            
+            <!-- What I Do Pillars -->
+            <div class="specialization-grid">
+              <div class="spec-card">
+                <div class="card-icon red-glow"><i class="fa-solid fa-network-wired"></i></div>
+                <div class="card-body">
+                  <h3>AI & Machine Learning</h3>
+                  <p>Developing deep learning vision pipelines, NLP models, predictive telemetry analysis, and algorithm optimization with PyTorch & TensorFlow.</p>
+                </div>
+              </div>
+              <div class="spec-card">
+                <div class="card-icon yellow-glow"><i class="fa-solid fa-people-group"></i></div>
+                <div class="card-body">
+                  <h3>Collaborative Projects</h3>
+                  <p>Leading and contributing in agile cross-functional hackathons, Git team workflows, modular system architecture, and rapid deployment sprints.</p>
+                </div>
+              </div>
+              <div class="spec-card">
+                <div class="card-icon blue-glow"><i class="fa-solid fa-microchip"></i></div>
+                <div class="card-body">
+                  <h3>Systems & Full-Stack</h3>
+                  <p>Architecting robust, low-latency microservices, interactive 3D WebGL interfaces, modern APIs, and high-performance cloud data pipelines.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- CONNECT TAB (Formula 1 Oracle Red Bull Theme) -->
+            <div class="connect-tab-wrapper">
+              <button class="connect-tab-trigger active" id="connect-tab-toggle">
+                <i class="fa-solid fa-walkie-talkie"></i>
+                <span>TEAM RADIO // CONNECT WITH RASHI</span>
+                <i class="fa-solid fa-chevron-down toggle-icon" id="connect-chevron"></i>
+              </button>
+
+              <div class="connect-dropdown-content" id="connect-content">
+                <div class="pit-comms-panel">
+                  <div class="comms-header">
+                    <span class="radio-freq"><i class="fa-solid fa-tower-broadcast"></i> PIT-WALL FREQUENCY: 104.8 MHz [OPEN]</span>
+                    <span class="ping-status">LATENCY: 12ms</span>
+                  </div>
+                  
+                  <div class="comms-channels">
+                    <a href="mailto:rashiwanwani@example.com" class="comms-btn" title="Send direct email">
+                      <i class="fa-solid fa-envelope"></i>
+                      <span>EMAIL PIT-WALL</span>
+                    </a>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="comms-btn" title="Connect on LinkedIn">
+                      <i class="fa-brands fa-linkedin"></i>
+                      <span>LINKEDIN</span>
+                    </a>
+                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="comms-btn" title="Inspect GitHub Repositories">
+                      <i class="fa-brands fa-github"></i>
+                      <span>GITHUB CODESPACE</span>
+                    </a>
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="comms-btn" title="Reach out on X">
+                      <i class="fa-brands fa-x-twitter"></i>
+                      <span>TELEMETRY FEED</span>
+                    </a>
+                  </div>
+
+                  <!-- Direct Transmission Form -->
+                  <form class="comms-form" id="pit-wall-form" onsubmit="event.preventDefault(); window.submitTelemetryMessage();">
+                    <div class="form-row">
+                      <input type="text" id="comms-name" placeholder="YOUR NAME / CALL SIGN" required class="f1-input" />
+                      <input type="email" id="comms-email" placeholder="YOUR EMAIL / FREQUENCY" required class="f1-input" />
+                    </div>
+                    <textarea id="comms-message" rows="2" placeholder="TYPE COLLABORATION TRANSMISSION..." required class="f1-input"></textarea>
+                    <button type="submit" class="f1-transmit-btn" id="transmit-btn">
+                      <i class="fa-solid fa-satellite-dish"></i> TRANSMIT TO PIT WALL
+                    </button>
+                    <div class="form-feedback" id="form-feedback"></div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM CENTER: BIG RB22 3D CAR (Three.js WebGL Interactive Scene) -->
+        <div class="rb22-car-section" id="rb22-section">
+          <div class="rb22-telemetry-header">
+            <span class="car-badge"><i class="fa-solid fa-car-side"></i> ORACLE RED BULL RACING</span>
+            <div class="car-angle-presets">
+              <button class="angle-btn active" id="btn-side-profile" onclick="window.rb22Viewer && window.rb22Viewer.setSideProfileView(); this.classList.add('active'); document.getElementById('btn-perspective').classList.remove('active');"><i class="fa-solid fa-arrows-left-right"></i> SIDE PROFILE</button>
+              <button class="angle-btn" id="btn-perspective" onclick="window.rb22Viewer && window.rb22Viewer.setPerspectiveView(); this.classList.add('active'); document.getElementById('btn-side-profile').classList.remove('active');"><i class="fa-solid fa-cube"></i> 3/4 3D</button>
+            </div>
+            <span class="car-instruction">DRAG TO ROTATE 360° • SCROLL DOWN TO ENTER STATS</span>
+          </div>
+
+          <!-- 3D WebGL Canvas Container for the big RB22 car -->
+          <div class="rb22-canvas-wrapper" id="rb22-canvas-container">
+            <canvas id="rb22-threejs-canvas"></canvas>
+            
+            <!-- Real-time Aerodynamic HUD Overlays -->
+            <div class="car-hud-stats">
+              <div class="hud-item"><span class="k">DOWNFORCE</span><span class="v" id="car-downforce">1,820 KG</span></div>
+              <div class="hud-item"><span class="k">TYRE TEMP</span><span class="v" id="car-tyre-temp">102°C</span></div>
+              <div class="hud-item"><span class="k">ANGLE</span><span class="v" id="car-rot-deg">0°</span></div>
+            </div>
+
+            <!-- Launch to Next Page Button overlay -->
+            <button class="rb22-launch-btn" id="rb22-launch-trigger" title="Launch RB22 to Lap 3 Stats">
+              <span>ENGAGE DRS & ADVANCE TO STATS</span>
+              <i class="fa-solid fa-forward-fast"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= PAGE 3: STATS (ACHIEVEMENTS IN ORDER) & CURRENT PROJECTS TASKBAR ================= -->
+    <section class="page-section page-3" id="page-3" data-index="3">
+      <div class="page-content flex-layout stats-layout">
+        
+        <!-- Top Header: F1 Broadcast Stat Board -->
+        <div class="f1-statboard-broadcast-header">
+          <div class="f1-graphics-badge">
+            <span class="f1-logo-box">F1</span>
+            <span class="f1-aws-tag">TELEMETRY STATS</span>
+          </div>
+          <div class="f1-statboard-title-group">
+            <h2 class="f1-driver-statboard-title">DRIVER CAREER STAT BOARD // RASHI WANWANI</h2>
+            <div class="f1-statboard-subline">ORACLE RED BULL RACING • HONDA RBPT • B.TECH CSE (AI & ML)</div>
+          </div>
+          <div class="f1-session-tag">
+            <span class="live-dot"></span>
+            <span>RACE BOARD LIVE</span>
+          </div>
+        </div>
+
+        <!-- F1 DUAL STAT BOARD GRID (Driver Stat Card on Left + Official Timing Board on Right) -->
+        <div class="f1-statboard-main-grid">
+          
+          <!-- LEFT: F1 BROADCAST DRIVER STAT CARD -->
+          <div class="f1-driver-stat-card glassmorphism">
+            <div class="stat-card-header">
+              <div class="driver-number-badge">01</div>
+              <div class="driver-id-block">
+                <div class="driver-flag-team">
+                  <span class="country-flag"><i class="fa-solid fa-flag-checkered"></i></span>
+                  <span class="team-name">ORACLE RED BULL RACING</span>
+                </div>
+                <div class="driver-full-name">R. WANWANI</div>
+                <div class="driver-spec-badge">AI / ML LEAD ENGINEER</div>
+              </div>
+            </div>
+
+            <!-- F1 Official Key Metrics Grid -->
+            <div class="f1-metrics-table">
+              <div class="f1-metric-row">
+                <span class="metric-name">ACADEMIC HONORS</span>
+                <span class="metric-value yellow-val">P1 DISTINCTION (TOP 5%)</span>
+              </div>
+              <div class="f1-metric-row">
+                <span class="metric-name">CGPA ACCELERATION</span>
+                <span class="metric-value green-val">9.4 / 10.0</span>
+              </div>
+              <div class="f1-metric-row">
+                <span class="metric-name">HACKATHON PODIUMS</span>
+                <span class="metric-value gold-val"><i class="fa-solid fa-trophy"></i> 1ST PLACE CHAMPION</span>
+              </div>
+              <div class="f1-metric-row">
+                <span class="metric-name">FASTEST SPRINT TIME</span>
+                <span class="metric-value purple-val"><i class="fa-solid fa-stopwatch"></i> 1:17.024 (500+ ALGOS)</span>
+              </div>
+              <div class="f1-metric-row">
+                <span class="metric-name">RESEARCH DEPLOYMENTS</span>
+                <span class="metric-value cyan-val">PEER REVIEWED PUBLICATION</span>
+              </div>
+              <div class="f1-metric-row">
+                <span class="metric-name">COLLAB TEAM REACH</span>
+                <span class="metric-value white-val">350+ DEVELOPERS MENTORED</span>
+              </div>
+              <div class="f1-metric-row">
+                <span class="metric-name">PIT STOP SPEED</span>
+                <span class="metric-value green-val">1.82s SPRINT CYCLE</span>
+              </div>
+              <div class="f1-metric-row">
+                <span class="metric-name">TYRE COMPOUND</span>
+                <span class="metric-value red-val"><span class="tyre-badge soft">S</span> PIRELLI P ZERO SOFT</span>
+              </div>
+            </div>
+
+            <!-- Live Telemetry Telemetry Gauges -->
+            <div class="driver-telemetry-gauges">
+              <div class="gauge-item">
+                <span class="g-lbl">THROTTLE</span>
+                <div class="g-bar"><div class="fill green" style="width: 100%"></div></div>
+                <span class="g-val">100% WOT</span>
+              </div>
+              <div class="gauge-item">
+                <span class="g-lbl">ERS BOOST</span>
+                <div class="g-bar"><div class="fill blue" style="width: 98%"></div></div>
+                <span class="g-val">98% OPTIMAL</span>
+              </div>
+              <div class="gauge-item">
+                <span class="g-lbl">BRAKE LOAD</span>
+                <div class="g-bar"><div class="fill red" style="width: 0%"></div></div>
+                <span class="g-val">0% COAST</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: OFFICIAL F1 TIMING LEADERBOARD (ACHIEVEMENTS IN ORDER) -->
+          <div class="f1-timing-board-container glassmorphism">
+            <div class="timing-tower-header">
+              <span class="col-pos">POS</span>
+              <span class="col-no">NO</span>
+              <span class="col-driver">DRIVER // ACHIEVEMENT MILESTONE</span>
+              <span class="col-delta">INTERVAL</span>
+              <span class="col-s1">S1</span>
+              <span class="col-s2">S2</span>
+              <span class="col-s3">S3</span>
+              <span class="col-status">TELEMETRY</span>
+            </div>
+
+            <div class="timing-rows-list">
+              <!-- Achievement 1 (P1 Leader) -->
+              <div class="timing-row p1-row">
+                <div class="col-pos"><span class="pos-badge p1">1</span></div>
+                <div class="col-no"><span class="car-num">01</span></div>
+                <div class="col-driver">
+                  <div class="driver-tag-row"><span class="driver-code rb">WAN</span> <span class="driver-fullname">B.Tech CSE in AI & ML (Academic Distinction)</span></div>
+                  <div class="milestone-sub">Ranked in Top 5% • Advanced Neural Architectures & Machine Learning</div>
+                </div>
+                <div class="col-delta"><span class="gap-leader">LEADER</span></div>
+                <div class="col-s1"><span class="sector-chip purple">21.849</span></div>
+                <div class="col-s2"><span class="sector-chip purple">28.910</span></div>
+                <div class="col-s3"><span class="sector-chip purple">22.420</span></div>
+                <div class="col-status"><span class="telemetry-pill gold"><i class="fa-solid fa-medal"></i> 9.4 CGPA</span></div>
+              </div>
+
+              <!-- Achievement 2 (P1 Champion) -->
+              <div class="timing-row p1-row">
+                <div class="col-pos"><span class="pos-badge p1">1</span></div>
+                <div class="col-no"><span class="car-num">01</span></div>
+                <div class="col-driver">
+                  <div class="driver-tag-row"><span class="driver-code rb">WAN</span> <span class="driver-fullname">1st Place Winner – National Collaborative AI Hackathon</span></div>
+                  <div class="milestone-sub">Spearheaded 4-member cross-functional team • Real-time Vision Diagnostics in 36H</div>
+                </div>
+                <div class="col-delta"><span class="gap-time">+0.470</span></div>
+                <div class="col-s1"><span class="sector-chip green">21.902</span></div>
+                <div class="col-s2"><span class="sector-chip purple">29.014</span></div>
+                <div class="col-s3"><span class="sector-chip green">22.504</span></div>
+                <div class="col-status"><span class="telemetry-pill yellow"><i class="fa-solid fa-trophy"></i> CHAMPION</span></div>
+              </div>
+
+              <!-- Achievement 3 (P2 Research) -->
+              <div class="timing-row p2-row">
+                <div class="col-pos"><span class="pos-badge p2">2</span></div>
+                <div class="col-no"><span class="car-num">01</span></div>
+                <div class="col-driver">
+                  <div class="driver-tag-row"><span class="driver-code rb">WAN</span> <span class="driver-fullname">Published Deep Learning & Predictive Telemetry Paper</span></div>
+                  <div class="milestone-sub">Co-authored research on low-latency time-series inference for autonomous systems</div>
+                </div>
+                <div class="col-delta"><span class="gap-time">+0.920</span></div>
+                <div class="col-s1"><span class="sector-chip green">22.110</span></div>
+                <div class="col-s2"><span class="sector-chip green">29.240</span></div>
+                <div class="col-s3"><span class="sector-chip yellow">22.610</span></div>
+                <div class="col-status"><span class="telemetry-pill blue"><i class="fa-solid fa-book-bookmark"></i> PUBLISHED</span></div>
+              </div>
+
+              <!-- Achievement 4 (P3 Leadership) -->
+              <div class="timing-row p3-row">
+                <div class="col-pos"><span class="pos-badge p3">3</span></div>
+                <div class="col-no"><span class="car-num">01</span></div>
+                <div class="col-driver">
+                  <div class="driver-tag-row"><span class="driver-code rb">WAN</span> <span class="driver-fullname">Technical Lead & AI Society Student Mentor</span></div>
+                  <div class="milestone-sub">Conducted 6 hands-on collaborative bootcamps • Mentored 350+ student developers</div>
+                </div>
+                <div class="col-delta"><span class="gap-time">+1.560</span></div>
+                <div class="col-s1"><span class="sector-chip yellow">22.350</span></div>
+                <div class="col-s2"><span class="sector-chip green">29.580</span></div>
+                <div class="col-s3"><span class="sector-chip yellow">22.820</span></div>
+                <div class="col-status"><span class="telemetry-pill purple"><i class="fa-solid fa-users"></i> 350+ MENTORED</span></div>
+              </div>
+
+              <!-- Achievement 5 (Fastest Lap) -->
+              <div class="timing-row fastest-lap-row">
+                <div class="col-pos"><span class="pos-badge fl">FL</span></div>
+                <div class="col-no"><span class="car-num">01</span></div>
+                <div class="col-driver">
+                  <div class="driver-tag-row"><span class="driver-code fl-code">WAN</span> <span class="driver-fullname">500+ Algorithmic Challenges Mastered</span></div>
+                  <div class="milestone-sub">Top percentile in Data Structures, Dynamic Programming & Graph Optimization</div>
+                </div>
+                <div class="col-delta"><span class="gap-fl"><i class="fa-solid fa-stopwatch"></i> 1:17.024</span></div>
+                <div class="col-s1"><span class="sector-chip purple">21.210</span></div>
+                <div class="col-s2"><span class="sector-chip purple">28.410</span></div>
+                <div class="col-s3"><span class="sector-chip purple">22.010</span></div>
+                <div class="col-status"><span class="telemetry-pill fl-pill"><i class="fa-solid fa-flag-checkered"></i> FASTEST LAP</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= TASKBAR OF CURRENT PROJECTS ================= -->
+        <div class="current-projects-pitwall-taskbar" id="projects-taskbar">
+          <div class="taskbar-header">
+            <div class="taskbar-title">
+              <i class="fa-solid fa-bars-progress"></i>
+              <span>CURRENT PROJECTS // PIT WALL MISSION CONTROL</span>
+            </div>
+            <div class="taskbar-filters">
+              <button class="filter-btn active" data-filter="all">ALL SECTORS</button>
+              <button class="filter-btn" data-filter="ai">AI / ML</button>
+              <button class="filter-btn" data-filter="collab">COLLABORATIVE</button>
+              <button class="filter-btn" data-filter="systems">SYSTEMS</button>
+            </div>
+          </div>
+
+          <!-- Horizontal Interactive Project Cards Track -->
+          <div class="projects-dock" id="projects-dock">
+            
+            <!-- Project 1 -->
+            <div class="project-dock-card" data-category="ai">
+              <div class="proj-header">
+                <span class="proj-badge rb-red">AI / ML CORE</span>
+                <span class="proj-telemetry-status live"><i class="fa-solid fa-circle"></i> SPRINT 4</span>
+              </div>
+              <h4 class="proj-name">RB-NeuralTelemetry Engine</h4>
+              <p class="proj-summary">Deep neural time-series model predicting real-time tire degradation, aerodynamic load shifts, and optimal pit stop windows.</p>
+              <div class="proj-tech-stack">
+                <span class="tech-tag">PyTorch</span>
+                <span class="tech-tag">FastAPI</span>
+                <span class="tech-tag">WebGL</span>
+              </div>
+              <div class="proj-footer">
+                <div class="progress-container">
+                  <div class="progress-label"><span>COMPLETION</span><span>94%</span></div>
+                  <div class="progress-bar"><div class="fill red" style="width: 94%"></div></div>
+                </div>
+                <button class="proj-action-btn" onclick="window.viewProjectDetails('RB-NeuralTelemetry Engine', 'PyTorch, FastAPI, WebGL, Docker', 'Real-time Formula 1 vehicle telemetry prediction pipeline capable of processing 120Hz sensor data and estimating tyre degradation curves using LSTM & Transformer architectures.', 'https://github.com')"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+              </div>
+            </div>
+
+            <!-- Project 2 -->
+            <div class="project-dock-card" data-category="collab">
+              <div class="proj-header">
+                <span class="proj-badge rb-yellow">COLLABORATIVE</span>
+                <span class="proj-telemetry-status live"><i class="fa-solid fa-circle"></i> SPRINT 3</span>
+              </div>
+              <h4 class="proj-name">DevSync AI Workspace</h4>
+              <p class="proj-summary">Multi-agent collaborative pair-programming studio featuring peer synchronization, conflict resolution, and automated test generation.</p>
+              <div class="proj-tech-stack">
+                <span class="tech-tag">WebSockets</span>
+                <span class="tech-tag">TypeScript</span>
+                <span class="tech-tag">LLM Agents</span>
+              </div>
+              <div class="proj-footer">
+                <div class="progress-container">
+                  <div class="progress-label"><span>COMPLETION</span><span>88%</span></div>
+                  <div class="progress-bar"><div class="fill yellow" style="width: 88%"></div></div>
+                </div>
+                <button class="proj-action-btn" onclick="window.viewProjectDetails('DevSync AI Workspace', 'WebSockets, TypeScript, Node.js, LLM Agents', 'Engineered a real-time collaborative workspace allowing distributed software teams to concurrently edit, review, and auto-diagnose code errors with AI agent integration.', 'https://github.com')"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+              </div>
+            </div>
+
+            <!-- Project 3 -->
+            <div class="project-dock-card" data-category="ai">
+              <div class="proj-header">
+                <span class="proj-badge rb-blue">COMPUTER VISION</span>
+                <span class="proj-telemetry-status live"><i class="fa-solid fa-circle"></i> ACTIVE</span>
+              </div>
+              <h4 class="proj-name">AeroTrack High-Speed Vision</h4>
+              <p class="proj-summary">High-frame-rate computer vision system tracking aerodynamics wing vortexes and multi-vehicle spatial positioning at 140 FPS.</p>
+              <div class="proj-tech-stack">
+                <span class="tech-tag">YOLOv8</span>
+                <span class="tech-tag">OpenCV</span>
+                <span class="tech-tag">CUDA</span>
+              </div>
+              <div class="proj-footer">
+                <div class="progress-container">
+                  <div class="progress-label"><span>COMPLETION</span><span>91%</span></div>
+                  <div class="progress-bar"><div class="fill blue" style="width: 91%"></div></div>
+                </div>
+                <button class="proj-action-btn" onclick="window.viewProjectDetails('AeroTrack High-Speed Vision', 'YOLOv8, OpenCV, Python, CUDA', 'Trained custom vision models on high-speed track broadcast data to isolate vehicle trajectory slip angles, overtakes, and aerodynamic turbulence in real time.', 'https://github.com')"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+              </div>
+            </div>
+
+            <!-- Project 4 -->
+            <div class="project-dock-card" data-category="systems">
+              <div class="proj-header">
+                <span class="proj-badge rb-cyan">TELEMETRY HUD</span>
+                <span class="proj-telemetry-status live"><i class="fa-solid fa-circle"></i> DEPLOYED</span>
+              </div>
+              <h4 class="proj-name">Oracle Pulse Telemetry HUD</h4>
+              <p class="proj-summary">Distributed microservice streaming driver bio-telemetry, track conditions, and weather telemetry with sub-15ms rendering latency.</p>
+              <div class="proj-tech-stack">
+                <span class="tech-tag">Three.js</span>
+                <span class="tech-tag">WebRTC</span>
+                <span class="tech-tag">Go Microservices</span>
+              </div>
+              <div class="proj-footer">
+                <div class="progress-container">
+                  <div class="progress-label"><span>COMPLETION</span><span>100%</span></div>
+                  <div class="progress-bar"><div class="fill green" style="width: 100%"></div></div>
+                </div>
+                <button class="proj-action-btn" onclick="window.viewProjectDetails('Oracle Pulse Telemetry HUD', 'Three.js, WebGL, WebRTC, Go', 'Interactive 3D cockpit telemetry dashboard giving engineers instant visual feedback over throttle position, brake pressure, and G-force vectors.', 'https://github.com')"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Footer / Pit Wall Signoff -->
+        <footer class="f1-footer">
+          <div class="footer-left">
+            <span>RASHI WANWANI // ORACLE RED BULL RACING THEMED PORTFOLIO</span>
+          </div>
+          <div class="footer-nav">
+            <button class="return-lap-btn" onclick="window.navigateToPage(1)"><i class="fa-solid fa-arrow-up"></i> RETURN TO LAP 01</button>
+          </div>
+        </footer>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL FOR PROJECT TELEMETRY INSPECTION -->
+  <div class="project-modal-backdrop" id="project-modal">
+    <div class="project-modal-box glassmorphism">
+      <div class="modal-header">
+        <div class="modal-telemetry-title" id="modal-title">PROJECT TELEMETRY</div>
+        <button class="modal-close-btn" onclick="window.closeProjectModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-stat-line"><span class="k">STACK:</span> <span class="v" id="modal-stack"></span></div>
+        <p class="modal-desc" id="modal-description"></p>
+        <div class="modal-actions">
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="f1-transmit-btn"><i class="fa-brands fa-github"></i> VIEW CODE ON GITHUB</a>
+          <button class="modal-close-action" onclick="window.closeProjectModal()">CLOSE TELEMETRY</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="wheel.js"></script>
+  <script src="car3d.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
